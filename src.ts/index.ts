@@ -17,7 +17,6 @@ import {
   TypeParameterNode,
   TypeName,
   TypeDeclaration,
-  Transform,
   ObjectLiteralExpression,
   FunctionDeclaration,
   Parser,
@@ -25,20 +24,18 @@ import {
   FunctionExpression,
   FunctionTypeNode,
   ParameterNode,
-  DeclarationStatement
-} from "visitor-as/as";
+  DeclarationStatement,
+} from "assemblyscript";
+import { toString, getTypeName, getName } from "./visitor/utils.js";
 import {
-  SimpleParser,
-  BaseVisitor,
   registerDecorator,
-  Decorator,
-} from "visitor-as";
-import { toString, getName } from "visitor-as/dist/utils";
+  BaseVisitor,
+  SimpleParser,
+  Decorator
+} from "./visitor/index.js";
 
-export abstract class InterfaceDecorator {
-}
 
-export class Parameter {
+class Parameter {
   public name: string;
   public typeName: string;
   constructor(name: string, typeName: string) {
@@ -46,11 +43,11 @@ export class Parameter {
     this.typeName = typeName;
   }
   static fromNode(node: ParameterNode): Parameter {
-    return new Parameter(toString(node.name), "string");
+    return new Parameter(toString(node.name), getName(node as any));
   }
 }
 
-export class CallableMethod {
+class CallableMethod {
   public name: string;
   public parameters: Parameter[];
   public returnType: string;
@@ -70,12 +67,11 @@ export class CallableMethod {
     return node.parameters.map((v) => Parameter.fromNode(v));
   }
   static returnTypeFromSignature(node: FunctionTypeNode): string {
-    console.log(node);
-    return "string";
+    return getName(node.returnType as any);
   }
 }
 
-export class CallableClass {
+class CallableClass {
   public name: string;
   public methods: CallableMethod[];
   constructor(name: string, methods: CallableMethod[]) {
@@ -90,16 +86,21 @@ export class CallableClass {
   }
 }
 
-export class CallableTransformer {
+class CallableTransformer {
+  public decorator: CallableDecorator;
+  public source: Source[];
+  constructor(decorator: CallableDecorator) {
+    this.decorator = decorator;
+  }
   visit(node: InterfaceDeclaration) {
-    this.stdout.write(CallableClass.fromNode(node).buildClass());
+    (this.decorator as any).visitClassExpression(SimpleParser.parseClassExpression(this.buildClass(CallableClass.fromNode(node))));
   }
   buildClass(klass: CallableClass): string {
     return (
-      `class ${klass.name} implements callable.Calleble {\n` +
-      `  public address: callable.Address;\n` +
+      `class ${klass.name} implements callable.Callable {\n` +
+      `  public _target: callable.Address;\n` +
       `  constructor(address: callable.Address) {\n` +
-      `    this.address = address;\n` +
+      `    this._target = address;\n` +
       `  }\n` +
       `  static at(address: callable.Address): ${klass.name} {\n` +
       `    return new ${klass.name}(address);\n` +
@@ -109,8 +110,8 @@ export class CallableTransformer {
           `  ${v.name}(${v.parameters.map(({ name, typeName }, i) => {
             return `${name}: ${typeName}` + (i !== ary.length - 1 ? "," : "");
           })}): ${v.returnType} {\n` +
-          `    const writer = new BinaryWriter();\n` +
-          `    writer.writeSelector(encodeSelector("${v.name}"));\n` +
+          `    const writer = new callable.BytesWriter();\n` +
+          `    writer.writeSelector(callable.encodeSelector("${v.name}"));\n` +
           v.parameters
             .map((v) => {
               switch (v.typeName) {
@@ -144,7 +145,7 @@ export class CallableTransformer {
               }
             })
             .join("") +
-          `const reader = callable.extcall(this.address, writer);\n` +
+          `    const reader = callable.extcall(this._target, writer);\n` +
           (() => {
             switch (v.returnType) {
               case "string":
@@ -184,20 +185,16 @@ export class CallableTransformer {
   }
 }
 
-export class CallableDecorator extends Decorator {
+class CallableDecorator extends Decorator {
   get name(): string {
     return "callable";
-  }
-  get sourceFilter() {
-    return (_: any) => true;
   }
   visitInterfaceDeclaration(
     node: InterfaceDeclaration,
     isDefault = false,
   ): void {
-    console.log(isDefault);
-    new CallableTransformer().visit(node);
+    new CallableTransformer(this).visit(node);
   }
 }
 
-export = registerDecorator(new CallableDecorator());
+export default registerDecorator(new CallableDecorator());

@@ -2,46 +2,42 @@
   "name": "op-callable",
   "version": "0.1.0",
   "description": "callable AssemblyScript interfaces for OP_NET",
-  "types": "assembly/index.ts",
-  "ascMain": "assembly/index.ts",
   "author": "flex",
+  "main": "lib/index.js",
+  "type": "module",
   "license": "MIT",
+  "exports": {
+    ".": {
+      "import": "./lib/index.js",
+      "types": "./lib/index.d.ts"
+    },
+    "assembly": {
+      "import": "./assembly/index.ts"
+    }
+  },
   "scripts": {
     "build:transform": "tsc",
-    "build": "npm-run-all build:transform",
-    "build:test": "asc assembly/test.ts --transform ./transform --target test --explicitStart",
+    "build": "npm-run-all build:transform asbuild:untouched",
+    "build:test": "asc --transform . test/index.ts",
     "asbuild:untouched": "asc assembly/index.ts --target debug",
     "asbuild:optimized": "asc assembly/index.ts --target release",
     "asbuild": "yarn asbuild:untouched && yarn asbuild:optimized",
     "prettier:ts": "prettier --write src.ts/**/*.ts"
   },
   "devDependencies": {
-    "@as-pect/cli": "^6.2.4",
-    "@assemblyscript/loader": "^0.19.10",
-    "@serial-as/json": "^1.0.2",
-    "@types/jest": "^27.0.2",
-    "@types/line-column": "^1.0.0",
-    "as-base64": "^0.2.0",
-    "as-bignum": "^0.2.18",
-    "as-console": "^6.0.2",
-    "as-variant": "^0.2.1",
-    "as-wasi": "^0.4.6",
-    "asbuild": "^0.2.0",
-    "assemblyscript": "^0.19.18",
-    "assemblyscript-json": "^1.1.0",
-    "jest": "^27.3.1",
-    "kati": "^0.6.2",
-    "lerna": "^4.0.0",
+    "assemblyscript": "^0.27.29",
     "npm-run-all": "^4.1.5",
     "prettier": "^3.3.3",
-    "rimraf": "^3.0.2",
-    "ts-jest": "^27.0.7",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.4.4"
+    "ts-node": "^10.9.2",
+    "@types/lodash.clonedeep": "^4.5.7",
+    "@types/node": "^18.11.13",
+    "typescript": "^5.5.4"
   },
   "dependencies": {
-    "@btc-vision/btc-runtime": "https://github.com/btc-vision/btc-runtime",
-    "as-string-sink": "^0.4.2"
+    "@btc-vision/btc-runtime": "^1.1.3",
+    "lodash.clonedeep": "^4.5.0",
+    "ts-mixer": "^6.0.2",
+    "visitor-as": "0.7.1-0"
   },
   "repository": {
     "type": "git",
