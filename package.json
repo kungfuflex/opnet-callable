@@ -1,0 +1,51 @@
+{
+  "name": "op-callable",
+  "version": "0.1.0",
+  "description": "callable AssemblyScript interfaces for OP_NET",
+  "types": "assembly/index.ts",
+  "ascMain": "assembly/index.ts",
+  "author": "flex",
+  "license": "MIT",
+  "scripts": {
+    "build:transform": "tsc -w -p ./transform",
+    "build:test": "asc assembly/test.ts --transform ./transform --target test --explicitStart",
+    "asbuild:untouched": "asc assembly/index.ts --target debug",
+    "asbuild:optimized": "asc assembly/index.ts --target release",
+    "asbuild": "yarn asbuild:untouched && yarn asbuild:optimized"
+  },
+  "devDependencies": {
+    "@as-pect/cli": "^6.2.4",
+    "@assemblyscript/loader": "^0.19.10",
+    "@serial-as/json": "^1.0.2",
+    "@types/jest": "^27.0.2",
+    "@types/line-column": "^1.0.0",
+    "as-base64": "^0.2.0",
+    "as-bignum": "^0.2.18",
+    "as-console": "^6.0.2",
+    "as-variant": "^0.2.1",
+    "as-wasi": "^0.4.6",
+    "asbuild": "^0.2.0",
+    "assemblyscript": "^0.19.18",
+    "assemblyscript-json": "^1.1.0",
+    "jest": "^27.3.1",
+    "kati": "^0.6.2",
+    "lerna": "^4.0.0",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^27.0.7",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "@btc-vision/btc-runtime": "https://github.com/btc-vision/btc-runtime",
+    "as-string-sink": "^0.4.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kungfuflex/op-callable.git"
+  },
+  "keywords": [
+    "assemblyscript",
+    "callable",
+    "OP_NET"
+  ]
+}
