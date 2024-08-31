@@ -7,11 +7,13 @@
   "author": "flex",
   "license": "MIT",
   "scripts": {
-    "build:transform": "tsc -w -p ./transform",
+    "build:transform": "tsc",
+    "build": "npm-run-all build:transform",
     "build:test": "asc assembly/test.ts --transform ./transform --target test --explicitStart",
     "asbuild:untouched": "asc assembly/index.ts --target debug",
     "asbuild:optimized": "asc assembly/index.ts --target release",
-    "asbuild": "yarn asbuild:untouched && yarn asbuild:optimized"
+    "asbuild": "yarn asbuild:untouched && yarn asbuild:optimized",
+    "prettier:ts": "prettier --write src.ts/**/*.ts"
   },
   "devDependencies": {
     "@as-pect/cli": "^6.2.4",
@@ -30,6 +32,8 @@
     "jest": "^27.3.1",
     "kati": "^0.6.2",
     "lerna": "^4.0.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.3.3",
     "rimraf": "^3.0.2",
     "ts-jest": "^27.0.7",
     "ts-node": "^10.4.0",
