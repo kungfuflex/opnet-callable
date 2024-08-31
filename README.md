@@ -11,6 +11,7 @@ yarn add https://github.com/kungfuflex/op-callable
 ## Usage
 
 ```js
+import { u256 } from "as-bignum/assembly";
 import { callable } from "op-callable";
 
 @callable
