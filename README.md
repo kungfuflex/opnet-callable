@@ -1,18 +1,18 @@
-# op-callable
+# opnet-callable
 
 AssemblyScript transform to enable `@callable` decorator for an interface. Interfaces decorated with `@callable` function similar to interface defitions in Solidity, where they can be constructed with an address argument and their methods called as functions which automatically ABI encode arguments and ABI decode result values.
 
 ## Installation
 
 ```sh
-yarn add https://github.com/kungfuflex/op-callable
+yarn add https://github.com/kungfuflex/opnet-callable
 ```
 
 ## Usage
 
 ```js
 import { u256 } from "as-bignum/assembly";
-import { callable } from "op-callable";
+import { callable } from "opnet-callable";
 
 @callable
 interface IStaking {
