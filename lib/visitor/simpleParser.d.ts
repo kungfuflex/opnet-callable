@@ -2,7 +2,7 @@ import { Expression, Statement, NamespaceDeclaration, ClassDeclaration, Declarat
 export declare class SimpleParser {
     private static get parser();
     private static getTokenizer;
-    static parseClassExpression(s: string): ClassDeclaration;
+    static parseClassDeclaration(s: string): ClassDeclaration;
     static parseExpression(s: string): Expression;
     static parseStatement(s: string, topLevel?: boolean): Statement;
     static parseTopLevelStatement(s: string, namespace?: NamespaceDeclaration | null): Statement;

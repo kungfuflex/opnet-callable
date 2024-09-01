@@ -10,7 +10,7 @@ export declare class TopLevelDecorator extends PathTransformVisitor {
     static registerVisitor(visitor: DecoratorVisitor): void;
     private get visitor();
     visitInterfaceDeclaration(node: InterfaceDeclaration): void;
-    afterParse(_: Parser): void;
+    afterParse(parser: Parser): void;
 }
 export declare abstract class Decorator extends PathTransformVisitor {
     /**

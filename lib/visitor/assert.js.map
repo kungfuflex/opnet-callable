@@ -1,1 +1,1 @@
-{"version":3,"file":"assert.js","sourceRoot":"","sources":["../../src.ts/visitor/assert.ts"],"names":[],"mappings":"AAAA,MAAM,UAAU,MAAM,CAAC,SAAc,EAAE,UAAkB,kBAAkB;IACzE,IAAI,CAAC,SAAS;QAAE,MAAM,KAAK,CAAC,OAAO,CAAC,CAAC;IACrC,OAAO,SAAS,CAAC;AACnB,CAAC"}
+{"version":3,"file":"assert.js","sourceRoot":"","sources":["../../src.ts/visitor/assert.ts"],"names":[],"mappings":"AAAA,MAAM,UAAU,MAAM,CACpB,SAAc,EACd,UAAkB,kBAAkB;IAEpC,IAAI,CAAC,SAAS;QAAE,MAAM,KAAK,CAAC,OAAO,CAAC,CAAC;IACrC,OAAO,SAAS,CAAC;AACnB,CAAC"}

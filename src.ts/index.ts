@@ -1,5 +1,7 @@
 import {
   InterfaceDeclaration,
+  IdentifierExpression,
+  Node,
   MethodDeclaration,
   TypeNode,
   ClassDeclaration,
@@ -26,13 +28,14 @@ import {
   ParameterNode,
   DeclarationStatement,
 } from "assemblyscript";
-import { toString, getTypeName, getName } from "./visitor/utils.js";
+import { cloneNode, toString, getTypeName, getName } from "./visitor/utils.js";
 import {
-  registerDecorator,
-  BaseVisitor,
+  PathVisitor,
+  TransformVisitor,
+  Collection,
   SimpleParser,
-  Decorator
 } from "./visitor/index.js";
+import { Mixin } from "ts-mixer";
 
 
 class Parameter {
@@ -86,14 +89,50 @@ class CallableClass {
   }
 }
 
-class CallableTransformer {
-  public decorator: CallableDecorator;
-  public source: Source[];
-  constructor(decorator: CallableDecorator) {
-    this.decorator = decorator;
+const recurseApplyRange = (v: any, range: any) => {
+  if (typeof v === 'object') {
+    if (v === null) return;
+    if (Array.isArray(v)) return v.forEach((v) => recurseApplyRange(v, range));
+    if (v.range) v.range = range;
+    Object.entries(v).forEach(([k, v]) => {
+      if (k === 'range') return;
+      return recurseApplyRange(v, range);
+    });
   }
-  visit(node: InterfaceDeclaration) {
-    (this.decorator as any).visitClassExpression(SimpleParser.parseClassExpression(this.buildClass(CallableClass.fromNode(node))));
+};
+
+export default class CallableTransform extends TransformVisitor {
+  afterParse(parser: Parser): void {
+    // Create new transform
+    // Loop over every source
+    for (const source of parser.sources) {
+      // Ignore all lib (std lib). Visit everything else.
+      if (!source.isLibrary && !source.internalPath.startsWith(`~lib/`)) {
+        this.visit(source);
+      }
+    }
+  }
+  visitInterfaceDeclaration(node: InterfaceDeclaration, isDefault: boolean = false): InterfaceDeclaration {
+    if (node.decorators && node.decorators.length) {
+      if (((node.decorators[0]).name as IdentifierExpression).text === this.name) {
+        const cloned = cloneNode(node);
+        const klass = SimpleParser.parseClassDeclaration(this.buildClass(CallableClass.fromNode(node)));
+	cloned.kind = klass.kind;
+	cloned.name = klass.name;
+	cloned.decorators = [];
+	const members = cloned.members;
+	cloned.members = klass.members;
+	cloned.members.forEach((v, i, ary) => {
+          const member = members[Math.max(0, i - 3)];
+          recurseApplyRange(v, member.range);
+	});
+	return cloned;
+      }
+    }
+    return super.visitInterfaceDeclaration(node);
+  }
+  visit(node: Collection<Node>): Collection<Node> {
+    return super.visit(node);
   }
   buildClass(klass: CallableClass): string {
     return (
@@ -110,7 +149,7 @@ class CallableTransformer {
           `  ${v.name}(${v.parameters.map(({ name, typeName }, i) => {
             return `${name}: ${typeName}` + (i !== ary.length - 1 ? "," : "");
           })}): ${v.returnType} {\n` +
-          `    const writer = new callable.BytesWriter();\n` +
+          `    const writer = callable.BytesWriter();\n` +
           `    writer.writeSelector(callable.encodeSelector("${v.name}"));\n` +
           v.parameters
             .map((v) => {
@@ -133,9 +172,12 @@ class CallableTransformer {
                 case "Uint8Array":
                   return `    writer.writeBytesWithLength(${v.name});\n`;
                 case "Address":
+                case "callable.Address":
                   return `    writer.writeAddress(${v.name});\n`;
                 case "Address[]":
+                case "callable.Address[]":
                 case "Array<Address>":
+                case "Array<callable.Address[]>":
                   return `    writer.writeAddressArray(${v.name});\n`;
                 case "u256[]":
                 case "Array<u256>":
@@ -166,9 +208,12 @@ class CallableTransformer {
               case "Uint8Array":
                 return `    return Uint8Array.wrap(reader.readBytesWithLength());\n`;
               case "Address":
-                return `    return reader.readAddress(${v.name});\n`;
+              case "callable.Address":
+                return `    return reader.readAddress();\n`;
               case "Address[]":
+              case "callable.Address[]":
               case "Array<Address>":
+              case "Array<callable.Address>":
                 return `    return reader.readAddressArray();\n`;
               case "u256[]":
               case "Array<u256>":
@@ -183,18 +228,8 @@ class CallableTransformer {
       `}`
     );
   }
-}
-
-class CallableDecorator extends Decorator {
   get name(): string {
     return "callable";
   }
-  visitInterfaceDeclaration(
-    node: InterfaceDeclaration,
-    isDefault = false,
-  ): void {
-    new CallableTransformer(this).visit(node);
-  }
 }
 
-export default registerDecorator(new CallableDecorator());
