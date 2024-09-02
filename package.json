@@ -1,5 +1,5 @@
 {
-  "name": "op-callable",
+  "name": "opnet-callable",
   "version": "0.1.0",
   "description": "callable AssemblyScript interfaces for OP_NET",
   "author": "flex",
