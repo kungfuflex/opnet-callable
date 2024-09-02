@@ -2497,10 +2497,19 @@
   i32.const 0
   call $~lib/rt/itcms/__link
  )
+ (func $~lib/@btc-vision/btc-runtime/runtime/env/BTCEnvironment/BlockchainEnvironment#set:_selfContract (param $this i32) (param $_selfContract i32)
+  local.get $this
+  local.get $_selfContract
+  i32.store offset=12
+  local.get $this
+  local.get $_selfContract
+  i32.const 0
+  call $~lib/rt/itcms/__link
+ )
  (func $~lib/@btc-vision/btc-runtime/runtime/env/BTCEnvironment/BlockchainEnvironment#set:_origin (param $this i32) (param $_origin i32)
   local.get $this
   local.get $_origin
-  i32.store offset=12
+  i32.store offset=16
   local.get $this
   local.get $_origin
   i32.const 0
@@ -2509,7 +2518,7 @@
  (func $~lib/@btc-vision/btc-runtime/runtime/env/BTCEnvironment/BlockchainEnvironment#set:_sender (param $this i32) (param $_sender i32)
   local.get $this
   local.get $_sender
-  i32.store offset=16
+  i32.store offset=20
   local.get $this
   local.get $_sender
   i32.const 0
@@ -2758,6 +2767,14 @@
   end
   local.get $0
   i32.load offset=16
+  local.tee $2
+  if
+   local.get $2
+   local.get $1
+   call $~lib/rt/itcms/__visit
+  end
+  local.get $0
+  i32.load offset=20
   local.tee $2
   if
    local.get $2
@@ -3548,6 +3565,14 @@
   i32.store offset=8
   local.get $3
   call $~lib/@btc-vision/btc-runtime/runtime/env/BTCEnvironment/BlockchainEnvironment#set:currentBlock
+  local.get $this
+  local.set $3
+  global.get $~lib/memory/__stack_pointer
+  local.get $3
+  i32.store offset=4
+  local.get $3
+  i32.const 0
+  call $~lib/@btc-vision/btc-runtime/runtime/env/BTCEnvironment/BlockchainEnvironment#set:_selfContract
   local.get $this
   local.set $3
   global.get $~lib/memory/__stack_pointer
