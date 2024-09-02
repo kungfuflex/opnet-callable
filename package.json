@@ -7,11 +7,11 @@
   "type": "module",
   "license": "MIT",
   "exports": {
-    "transform": {
+    "./transform": {
       "import": "./lib/index.js",
       "types": "./lib/index.d.ts"
     },
-    "assembly": {
+    "./assembly": {
       "import": "./assembly/index.ts"
     }
   },
