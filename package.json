@@ -7,7 +7,7 @@
   "type": "module",
   "license": "MIT",
   "exports": {
-    ".": {
+    "transform": {
       "import": "./lib/index.js",
       "types": "./lib/index.d.ts"
     },
