@@ -79,8 +79,7 @@ class CallableMethod {
     return node.parameters.map((v) => Parameter.fromNode(v));
   }
   static returnTypeFromSignature(node: FunctionTypeNode): string {
-    console.log(node.returnType);
-    return getName(node.returnType as any);
+    return (node as any).returnType.name.identifier.text as string;
   }
 }
 

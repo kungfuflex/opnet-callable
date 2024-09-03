@@ -34,8 +34,7 @@ class CallableMethod {
         return node.parameters.map((v) => Parameter.fromNode(v));
     }
     static returnTypeFromSignature(node) {
-        console.log(node.returnType);
-        return getName(node.returnType);
+        return node.returnType.name.identifier.text;
     }
 }
 class CallableClass {
