@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+      "target": "es6",
+      "module": "es6",
+      "declaration": false,
+      "sourceMap": false,
+      "outDir": "./lib/",
+      "downlevelIteration": true,
+      "esModuleInterop": false,
+      "moduleResolution": "node",
+      "skipLibCheck": true
+    }
+  }
+  

@@ -10,7 +10,7 @@
     "noImplicitAny": false,
     "esModuleInterop": true,
     "sourceMap": true,
-    "outDir": "./lib",
+    "outDir": "./transform/lib",
     "declaration": true,
     "types": ["node"]
   },

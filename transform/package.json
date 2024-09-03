@@ -1,0 +1,27 @@
+{
+  "name": "@opnet-callable/transform",
+  "version": "0.1.0",
+  "description": "transform",
+  "main": "./lib/index.js",
+  "author": "Jairus Tanaka",
+  "license": "MIT",
+  "devDependencies": {
+    "assemblyscript": "^0.27.1"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kungfuflex/opnet-callable.git"
+  },
+  "keywords": [
+    "assemblyscript",
+    "json",
+    "serialize",
+    "deserialize",
+    "stringify",
+    "data",
+    "serde"
+  ],
+  "type": "module",
+  "exports": "./lib/index.js"
+}

@@ -27,15 +27,24 @@ import {
   FunctionTypeNode,
   ParameterNode,
   DeclarationStatement,
-} from "assemblyscript";
-import { cloneNode, toString, getTypeName, getName } from "./visitor/utils.js";
+} from "assemblyscript/dist/assemblyscript.js";
+import { cloneNode, toString, getName } from "visitor-as/dist/utils.js";
 import {
-  PathVisitor,
   TransformVisitor,
-  Collection,
-  SimpleParser,
-} from "./visitor/index.js";
-import { Mixin } from "ts-mixer";
+  SimpleParser
+} from "visitor-as/dist/index.js";
+
+class LessSimpleParser extends SimpleParser {
+  static parseClassDeclaration(s: string): ClassDeclaration {
+    const tn = (this as any).getTokenizer(s);
+    tn.next();
+    const res = new Parser().parseClassOrInterface(tn, 0, [], tn.pos || 0);
+    if (res == null) {
+        throw new Error("Failed to parse the expression: '" + s + "'");
+    }
+    return res as ClassDeclaration;
+  }
+}
 
 
 class Parameter {
@@ -70,6 +79,7 @@ class CallableMethod {
     return node.parameters.map((v) => Parameter.fromNode(v));
   }
   static returnTypeFromSignature(node: FunctionTypeNode): string {
+    console.log(node.returnType);
     return getName(node.returnType as any);
   }
 }
@@ -116,7 +126,7 @@ export default class CallableTransform extends TransformVisitor {
     if (node.decorators && node.decorators.length) {
       if (((node.decorators[0]).name as IdentifierExpression).text === this.name) {
         const cloned = cloneNode(node);
-        const klass = SimpleParser.parseClassDeclaration(this.buildClass(CallableClass.fromNode(node)));
+        const klass = LessSimpleParser.parseClassDeclaration(this.buildClass(CallableClass.fromNode(node)));
 	cloned.kind = klass.kind;
 	cloned.name = klass.name;
 	cloned.decorators = [];
@@ -130,9 +140,6 @@ export default class CallableTransform extends TransformVisitor {
       }
     }
     return super.visitInterfaceDeclaration(node);
-  }
-  visit(node: Collection<Node>): Collection<Node> {
-    return super.visit(node);
   }
   buildClass(klass: CallableClass): string {
     return (
