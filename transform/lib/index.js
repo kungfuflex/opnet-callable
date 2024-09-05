@@ -1,6 +1,12 @@
 import { Parser, } from "assemblyscript/dist/assemblyscript.js";
-import { cloneNode, toString, getName } from "visitor-as/dist/utils.js";
+import { cloneNode, toString } from "visitor-as/dist/utils.js";
 import { TransformVisitor, SimpleParser } from "visitor-as/dist/index.js";
+const DEBUG = process.env.OPNET_CALLABLE_DEBUG;
+const ln = (v) => {
+    if (DEBUG)
+        console.log(v);
+    return v;
+};
 class LessSimpleParser extends SimpleParser {
     static parseClassDeclaration(s) {
         const tn = this.getTokenizer(s);
@@ -12,13 +18,19 @@ class LessSimpleParser extends SimpleParser {
         return res;
     }
 }
+const buildTypeName = (v) => {
+    let identifier = v.name.identifier.text;
+    if (identifier === 'Address')
+        identifier = 'callable.Address';
+    return identifier + (v.typeArguments.length === 0 ? '' : '<' + v.typeArguments.map((v) => buildTypeName(v)).join(', ') + '>');
+};
 class Parameter {
     constructor(name, typeName) {
         this.name = name;
         this.typeName = typeName;
     }
     static fromNode(node) {
-        return new Parameter(toString(node.name), getName(node));
+        return new Parameter(toString(node.name), buildTypeName(node.type));
     }
 }
 class CallableMethod {
@@ -76,7 +88,7 @@ export default class CallableTransform extends TransformVisitor {
         if (node.decorators && node.decorators.length) {
             if ((node.decorators[0]).name.text === this.name) {
                 const cloned = cloneNode(node);
-                const klass = LessSimpleParser.parseClassDeclaration(this.buildClass(CallableClass.fromNode(node)));
+                const klass = LessSimpleParser.parseClassDeclaration(ln(this.buildClass(CallableClass.fromNode(node))));
                 cloned.kind = klass.kind;
                 cloned.name = klass.name;
                 cloned.decorators = [];
@@ -101,9 +113,12 @@ export default class CallableTransform extends TransformVisitor {
             `    return new ${klass.name}(address);\n` +
             `  }\n` +
             klass.methods.map((v, i, ary) => {
-                return (`  ${v.name}(${v.parameters.map(({ name, typeName }, i) => {
-                    return `${name}: ${typeName}` + (i !== ary.length - 1 ? "," : "");
-                })}): ${v.returnType} {\n` +
+                return (`  ${v.name}(${v.parameters.map((v, i, ary) => {
+                    let { name, typeName } = v;
+                    if (typeName === 'Address')
+                        typeName = 'callable.Address';
+                    return `${name}: ${typeName}` + (i === ary.length - 1 ? "" : ", ");
+                }).join('')}): ${v.returnType} {\n` +
                     `    const writer = callable.BytesWriter();\n` +
                     `    writer.writeSelector(callable.encodeSelector("${v.name}"));\n` +
                     v.parameters
@@ -121,7 +136,7 @@ export default class CallableTransform extends TransformVisitor {
                             case "u8":
                                 return `    writer.write${v.typeName.toUpperCase()}(${v.name});\n`;
                             case "boolean":
-                                return `    writer.writeBoolean(${v.name});\n;`;
+                                return `    writer.writeBoolean(${v.name});\n`;
                             case "ArrayBuffer":
                                 return `    writer.writeBytesWithLength(Uint8Array.wrap(${v.name}));\n`;
                             case "Uint8Array":
@@ -132,13 +147,13 @@ export default class CallableTransform extends TransformVisitor {
                             case "Address[]":
                             case "callable.Address[]":
                             case "Array<Address>":
-                            case "Array<callable.Address[]>":
+                            case "Array<callable.Address>":
                                 return `    writer.writeAddressArray(${v.name});\n`;
                             case "u256[]":
                             case "Array<u256>":
                                 return `    writer.writeTuple(${v.name});\n`;
                             default:
-                                return `    throw Error('no type detected');`;
+                                return `    throw Error('no type detected');\n`;
                         }
                     })
                         .join("") +
@@ -173,12 +188,14 @@ export default class CallableTransform extends TransformVisitor {
                             case "u256[]":
                             case "Array<u256>":
                                 return `    return reader.readTuple();\n`;
+                            case 'void':
+                                return `    return;\n`;
                             default:
-                                return `   return changetype<${v.returnType}>(0)\n`;
+                                return `    return changetype<${v.returnType}>(0);\n`;
                         }
                     })() +
                     `  }\n`);
-            }) +
+            }).join('') +
             `}`);
     }
     get name() {
